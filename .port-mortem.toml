@@ -1,16 +1,11 @@
-# Track and provenance metadata for this submission.
-# Fill in `track` with whatever letter/label your competition assigned you.
-
 track = "C -> Rust"
 
 source_url = "https://github.com/ludocode/mpack"
 source_project = "mpack"
 source_ref = "develop"
 
-# Commit hash of this repo at the moment porting work began -- i.e. the
-# "Baseline: original C source + tests, c2rust transpile compiling as
-# Rust crate" commit. Judges can diff against this to see exactly what
-# changed during the port.
+port_repo_url = "https://github.com/subhagataa/b3-isoMORPH-portMortem"
+
 kickoff_commit = "b0ce98fbc20281a99e1a9d1889011d750a64ae08"
 
-target_language = "Rust"
+target_language = "Rust"git add .port-mortem.toml
