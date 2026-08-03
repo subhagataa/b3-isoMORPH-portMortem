@@ -1,0 +1,89 @@
+Differential fuzz run against the original C implementation (reference-c/),
+via fuzz/harness.py, run inside the Docker image built from this repo's
+Dockerfile (rustlang/rust:nightly-bookworm base).
+
+Machine: Intel Core i5-11300H @ 3.10GHz, Linux arih
+5.15.167.4-microsoft-standard-WSL2 x86_64 (Docker Desktop / WSL2 host).
+
+Command sequence:
+  docker build -t mpack-port .
+  docker run --rm -it --entrypoint bash mpack-port
+  bash fuzz/build_fuzz_binaries.sh
+  python3 fuzz/harness.py --iterations 30000 --target reader
+  python3 fuzz/harness.py --iterations 30000 --target expect
+  bash fuzz/build_fuzz_binaries.sh   (rebuilt before the seeded re-run below)
+  python3 fuzz/harness.py --iterations 30000 --target reader --seed 42
+  python3 fuzz/harness.py --iterations 30000 --target expect --seed 42
+
+=====================================================================
+Run 1 -- Target: reader (mpack_read_tag / mpack_write_tag /
+          mpack_tree_parse, via fuzz.c -- reader/writer/node path)
+          default seed
+=====================================================================
+Loaded 5 corpus seed files from /repo/test/messagepack
+
+=== Done ===
+Ran 30000 inputs in 73.1s
+Mismatches found: 0
+Timeouts: 0
+
+=====================================================================
+Run 2 -- Target: expect (mpack_expect_* functions, via fuzz_expect.c --
+          12 variants: u8/u16/u32/u64/i8/i16/i32/i64/float/double,
+          u8_max, i32_range)
+          default seed
+=====================================================================
+Loaded 5 corpus seed files from /repo/test/messagepack
+
+=== Done ===
+Ran 30000 inputs in 79.5s
+Mismatches found: 0
+Timeouts: 0
+
+=====================================================================
+Run 3 -- Target: reader, --seed 42
+=====================================================================
+Loaded 5 corpus seed files from /repo/test/messagepack
+
+=== Done ===
+Ran 30000 inputs in 76.4s
+Mismatches found: 0
+Timeouts: 0
+
+=====================================================================
+Run 4 -- Target: expect, --seed 42
+=====================================================================
+Loaded 5 corpus seed files from /repo/test/messagepack
+
+=== Done ===
+Ran 30000 inputs in 85.1s
+Mismatches found: 0
+Timeouts: 0
+
+=====================================================================
+Summary
+=====================================================================
+Four differential fuzz runs total, spanning both targets (reader,
+expect) and two independent seeds (default RNG stream, and an explicit
+--seed 42 re-run requested specifically to rule out the default seed's
+RNG stream happening to avoid a divergence). 30,000 inputs per run,
+120,000 inputs total across all four runs. Zero mismatches and zero
+timeouts in every run. This is stronger evidence of behavioral
+equivalence than a single run would be, since it rules out the
+specific "got lucky with one seed" failure mode.
+
+Historical note: an earlier draft of this log referenced "244
+non-crash mismatches mentioned in DECISIONS.md" as something this
+result "superseded." That reference was incorrect -- DECISIONS.md
+contains no such entry, and no record of that figure or of what
+triggered it exists anywhere in this repo. It has been removed rather
+than carried forward. If reader-target mismatches were genuinely
+observed at some earlier point in development, that finding is not
+currently documented and should not be treated as resolved or as
+having happened, absent an actual DECISIONS.md entry describing it.
+
+Known gap: peak RSS was not measured for either binary in this
+environment (`/usr/bin/time` is absent from the rustlang/rust:nightly-
+bookworm build image used here). See bench/methodology.md, Status
+section, for detail and the fix needed before that number can be
+reported.

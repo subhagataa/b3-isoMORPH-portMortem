@@ -1,0 +1,19 @@
+
+[package]
+name = "mpack_rs"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "mpack_rs"
+crate-type = ["staticlib", "rlib"]
+
+[dependencies]
+libc = "0.2"
+
+[profile.dev]
+opt-level = 0
+debug = true
+
+[profile.release]
+opt-level = 3

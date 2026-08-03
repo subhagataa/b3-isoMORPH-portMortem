@@ -1,0 +1,9 @@
+Put new, port-specific tests here (tests that aren't part of the
+original C test suite at /test). Currently empty: this Rust port's
+correctness has so far been verified by linking it against the
+*original, unmodified* C test suite (see tools/link_tests.sh) rather
+than by writing new tests, plus differential fuzzing (see /fuzz).
+
+If you add Rust-native tests (e.g. #[test] modules, or a standalone
+tests/port/*.rs integration test), document why here and in
+DECISIONS.md.
