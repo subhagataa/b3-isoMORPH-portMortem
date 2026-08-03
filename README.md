@@ -72,11 +72,6 @@ The MPack code is small enough to be embedded directly into your codebase. Simpl
 
 MPack supports all modern compilers, all desktop and smartphone OSes, WebAssembly, [inside the Linux kernel](https://github.com/ludocode/mpack-linux-kernel), and even 8-bit microcontrollers such as Arduino. The MPack featureset can be customized at compile-time to set which features, components and debug checks are compiled, and what dependencies are available.
 
-## Build Status
-
-[![Unit Tests](https://github.com/ludocode/mpack/workflows/Unit%20Tests/badge.svg)](https://github.com/ludocode/mpack/actions?query=workflow%3A%22Unit+Tests%22)
-[![Coverage](https://coveralls.io/repos/ludocode/mpack/badge.svg?branch=develop&service=github)](https://coveralls.io/github/ludocode/mpack?branch=develop)
-
 ## The Node API
 
 The Node API parses a chunk of MessagePack data into an immutable tree of dynamically-typed nodes. A series of helper functions can be used to extract data of specific types from each node.
