@@ -15,7 +15,12 @@ The raw transpile of `mpack_store_u16`/`u32`/`u64` used `val.swap_bytes()` follo
 `mpack_store_float`/`mpack_store_double` originally reinterpreted a float's bits via a C union (translated faithfully by c2rust into a Rust union). We replaced this with the standard library's `to_bits()` methods, which do the same bit reinterpretation without a union, removing a category of undefined-behavior risk tied to union-based punning in Rust.
 
 ## 5. Narrowed `unsafe` scope via reference reborrowing instead of raw-pointer-everywhere
-Functions like the writer/tree tracking helpers (`mpack_writer_track_push`, `mpack_tree_root`, etc.) originally dereferenced raw pointers directly throughout the function body. We changed these to take one `unsafe { &mut *ptr }` (or `&*ptr`) reborrow at the top of the function, with a `SAFETY` comment stating the FFI contract being relied on, then use safe reference access for the rest of the function body.
+Functions originally dereferenced raw pointers directly throughout the function body. We changed these to take one `unsafe { &mut *ptr }` (or `&*ptr`) reborrow at the top of the function, with a `SAFETY` comment stating the FFI contract being relied on, then use safe reference access for the rest of the function body. This is a refactor-only pass done module by module on top of code already confirmed behaviorally correct via differential fuzzing (see #8), with a fuzzing re-run after each batch to confirm no behavior change.
+
+Status by module:
+- `mpack_writer.rs` -- complete for the targeted function set: `mpack_store_u8/u16/u32/u64/float/double`, and `mpack_writer_track_push/push_builder/pop/pop_builder/bytes`. Explicit `unsafe {}` blocks are now isolated to 16 total in this file, each scoped to the minimal necessary raw-pointer operation with a `SAFETY` comment. Other writer functions not in this list are out of scope for this pass and remain for a future pass.
+- `mpack_node.rs` -- started. Largest module not yet touched (130 unsafe functions, 3495 lines). 6 functions refactored so far following the same pattern: `mpack_tree_init_clear`, `mpack_tree_init_data`, `mpack_tree_error`, `mpack_tree_root`, `mpack_node_type`, `mpack_node_is_nil`. 124 functions remain.
+- `mpack_common.rs`, `mpack_platform.rs` -- not yet started.
 
 ## 6. Added a differential fuzzing harness and test-only shim code, not part of the original library
 `harness.py`, `fuzz_test_shim.c`, and the `fuzz-c`/`fuzz-rust`/`fuzz-expect-c`/`fuzz-expect-rust` build targets are new files we added for verification; none of them modify or replace any file in the original `mpack` source or its existing unit test suite, which we run unmodified.
