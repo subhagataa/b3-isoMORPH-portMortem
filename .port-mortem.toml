@@ -8,4 +8,4 @@ port_repo_url = "https://github.com/subhagataa/b3-isoMORPH-portMortem"
 
 kickoff_commit = "b0ce98fbc20281a99e1a9d1889011d750a64ae08"
 
-target_language = "Rust"git add .port-mortem.toml
+target_language = "Rust"
